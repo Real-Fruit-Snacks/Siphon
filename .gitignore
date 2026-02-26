@@ -1,0 +1,31 @@
+# Go build artifacts
+/build/
+/cmd
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Security-sensitive files
+/server/certs/
+/loot/
+*.pem
+*.key
+*.crt
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# AI-generated files
+.omc/
+.claude/
+CLAUDE.md
+AGENTS.md
+OPSEC_FIXES.md
