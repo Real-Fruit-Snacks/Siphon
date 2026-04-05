@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" fill="none">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f38ba8"/>
+      <stop offset="50%" stop-color="#f38ba8"/>
+      <stop offset="100%" stop-color="#eba0ac"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="43%" r="35%">
+      <stop offset="0%" stop-color="#f38ba8" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#f38ba8" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#eba0ac" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="textglow">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="640" fill="#11111b"/>
+  <ellipse cx="640" cy="280" rx="500" ry="140" fill="url(#glow)"/>
+  <text x="640" y="300" text-anchor="middle" font-family="Inter, SF Pro Display, Segoe UI, Helvetica Neue, Arial, sans-serif" font-size="120" font-weight="800" fill="url(#grad)" letter-spacing="12" filter="url(#textglow)">SIPHON</text>
+  <text x="640" y="350" text-anchor="middle" font-family="JetBrains Mono, SF Mono, Fira Code, monospace" font-size="24" fill="#7f849c" letter-spacing="8">LIGHTWEIGHT C2 FRAMEWORK</text>
+  <text x="640" y="390" text-anchor="middle" font-family="JetBrains Mono, SF Mono, Fira Code, monospace" font-size="16" fill="#585b70" letter-spacing="4">GO  ·  ECDH  ·  AES-GCM  ·  UTLS</text>
+</svg>
