@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" fill="none">
+  <defs>
+    <!-- Primary gradient: deep red to crimson -->
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="40%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <!-- Accent gradient -->
+    <linearGradient id="g2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+
+    <!-- Tube gradient -->
+    <linearGradient id="tubeGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <!-- Icon gradient: vertical for nodes -->
+    <linearGradient id="g3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#dc2626"/>
+    </linearGradient>
+
+    <!-- Subtle glow for the logomark -->
+    <filter id="softglow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#dc2626" flood-opacity="0.1" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+      <feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </filter>
+
+    <!-- Destination node glow -->
+    <filter id="destglow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#dc2626" flood-opacity="0.25" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="shadow"/>
+      <feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- ===================== LOGOMARK ===================== -->
+  <g transform="translate(58, 40)" filter="url(#softglow)">
+
+    <!-- Hexagonal frame — thin, elegant -->
+    <path d="M 80 6 L 140 38 L 140 102 L 80 134 L 20 102 L 20 38 Z"
+          fill="none" stroke="url(#g1)" stroke-width="1.5" opacity="0.35"/>
+
+    <!-- Inner hex subtle fill -->
+    <path d="M 80 14 L 134 42 L 134 98 L 80 126 L 26 98 L 26 42 Z"
+          fill="#dc2626" opacity="0.03"/>
+
+    <!-- Siphon tube: S-curve from bottom-left to top-right -->
+    <path d="M 36 105 C 36 80, 55 75, 65 65 C 75 55, 85 55, 95 50 C 105 45, 115 40, 125 30"
+          stroke="url(#tubeGrad)" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85"/>
+
+    <!-- Parallel inner tube line for depth -->
+    <path d="M 39 108 C 39 83, 57 78, 67 68 C 77 58, 87 58, 97 53 C 107 48, 117 43, 127 33"
+          stroke="url(#g2)" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.2"/>
+
+    <!-- Flow chevrons along tube indicating upward direction -->
+    <path d="M 48 90 L 52 86 L 56 90" stroke="#ef4444" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.55"/>
+    <path d="M 70 66 L 74 62 L 78 66" stroke="#dc2626" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.65"/>
+    <path d="M 100 48 L 104 44 L 108 48" stroke="#dc2626" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.75"/>
+
+    <!-- Source node at bottom-left (target — muted, 3px) -->
+    <circle cx="36" cy="105" r="3" fill="#ef4444" opacity="0.65"/>
+
+    <!-- Destination node at top-right (operator — bright, 5px with glow) -->
+    <g filter="url(#destglow)">
+      <circle cx="125" cy="30" r="5" fill="#dc2626" opacity="0.9"/>
+      <circle cx="125" cy="30" r="2.5" fill="#ffffff"/>
+    </g>
+    <circle cx="125" cy="30" r="8" fill="none" stroke="#dc2626" stroke-width="0.5" opacity="0.25"/>
+
+    <!-- Droplet shapes being pulled along the tube -->
+    <ellipse cx="45" cy="92" rx="2" ry="2.5" fill="#ef4444" opacity="0.45" transform="rotate(-40 45 92)"/>
+    <ellipse cx="62" cy="72" rx="1.8" ry="2.2" fill="#dc2626" opacity="0.5" transform="rotate(-35 62 72)"/>
+    <ellipse cx="82" cy="58" rx="1.5" ry="2" fill="#dc2626" opacity="0.55" transform="rotate(-30 82 58)"/>
+    <ellipse cx="112" cy="38" rx="1.5" ry="2" fill="#dc2626" opacity="0.6" transform="rotate(-30 112 38)"/>
+
+    <!-- Subtle flow particles -->
+    <circle cx="55" cy="78" r="1.2" fill="#ef4444" opacity="0.35"/>
+    <circle cx="90" cy="53" r="1.2" fill="#dc2626" opacity="0.35"/>
+    <circle cx="118" cy="34" r="1.5" fill="#dc2626" opacity="0.45"/>
+
+    <!-- Corner accents on hex -->
+    <circle cx="80" cy="6" r="2" fill="#dc2626" opacity="0.25"/>
+    <circle cx="80" cy="134" r="2" fill="#ef4444" opacity="0.25"/>
+  </g>
+
+  <!-- ===================== TYPOGRAPHY ===================== -->
+
+  <!-- "SIPHON" — clean, bold, wide-tracked -->
+  <text x="420" y="108"
+        font-family="'SF Pro Display', 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="82" font-weight="800" letter-spacing="18"
+        fill="url(#g1)" text-anchor="middle">SIPHON</text>
+
+  <!-- Thin separator line -->
+  <line x1="275" y1="128" x2="565" y2="128"
+        stroke="url(#g1)" stroke-width="0.8" opacity="0.2"/>
+
+  <!-- Tagline — refined, subtle -->
+  <text x="420" y="152"
+        font-family="'SF Mono', 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace"
+        font-size="11.5" font-weight="400" letter-spacing="5.5"
+        fill="#57534e" text-anchor="middle">LIGHTWEIGHT C2 FRAMEWORK</text>
+
+  <!-- Descriptor — very subtle -->
+  <text x="420" y="172"
+        font-family="'SF Mono', 'JetBrains Mono', 'Fira Code', monospace"
+        font-size="9" font-weight="400" letter-spacing="3"
+        fill="#a8a29e" text-anchor="middle">GO  ·  ECDH  ·  AES-GCM  ·  UTLS</text>
+</svg>
